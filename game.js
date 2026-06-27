@@ -1,6 +1,6 @@
-/* VendorFlow chicago-neighborhoods v1.1
-   v1.1: optional CTA 'L' rail-line overlay (non-interactive, toggleable).
-   Tap-the-map quiz engine for Chicago's 77 community areas.
+/* chicago-neighborhoods — tap-the-map quiz of Chicago's 77 community areas.
+   Optional CTA 'L' rail-line overlay (non-interactive, toggleable).
+   Tile colors are sourced from CSS custom properties (see style.css :root).
    State machine: start screen -> rounds -> end screen. No build step, no backend. */
 (function () {
   "use strict";
@@ -8,18 +8,21 @@
   var DATA = window.CHICAGO_COMMUNITY_AREAS;
   if (!DATA) { alert("Neighborhood data failed to load."); return; }
 
-  // ----- polygon styling (kept in JS so we can setStyle on Leaflet paths) -----
+  // ----- polygon styling (colors sourced from CSS so they live in one place) -----
+  var rootStyle = getComputedStyle(document.documentElement);
+  function cssVar(name) { return rootStyle.getPropertyValue(name).trim(); }
   var STYLE = {
-    base:    { fillColor: "oklch(13.2% 0.038 309.0)", color: "oklch(47.0% 0.044 311.7)", weight: 1,   fillOpacity: 0.82 },
-    correct: { fillColor: "#16a34a", color: "#22c55e", weight: 2,   fillOpacity: 0.9  },
-    wrong:   { fillColor: "#b91c1c", color: "#ef4444", weight: 2,   fillOpacity: 0.9  },
-    reveal:  { fillColor: "oklch(18.8% 0.100 300.2)", color: "oklch(52.4% 0.087 300.1)", weight: 2.5, fillOpacity: 0.92 }
+    base:    { fillColor: cssVar("--tile-base"),    color: cssVar("--tile-base-line"),    weight: 1,   fillOpacity: 0.82 },
+    hover:   { fillColor: cssVar("--tile-hover") },
+    correct: { fillColor: cssVar("--tile-correct"), color: cssVar("--tile-correct-line"), weight: 2,   fillOpacity: 0.9  },
+    wrong:   { fillColor: cssVar("--tile-wrong"),   color: cssVar("--tile-wrong-line"),   weight: 2,   fillOpacity: 0.9  },
+    reveal:  { fillColor: cssVar("--tile-reveal"),  color: cssVar("--tile-reveal-line"),  weight: 2.5, fillOpacity: 0.92 }
   };
 
   // ----- DOM -----
   var $ = function (id) { return document.getElementById(id); };
   var el = {
-    map: $("map"), hud: $("hud"), controls: $("controls"),
+    hud: $("hud"), controls: $("controls"),
     target: $("target"), progress: $("progress"), score: $("score"), streak: $("streak"),
     toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"),
     startScreen: $("start-screen"), endScreen: $("end-screen"), lToggle: $("l-toggle"),
@@ -38,15 +41,17 @@
   map.attributionControl.addAttribution("Boundaries: City of Chicago open data");
 
   var layersByNum = {};
+  var propsByNum = {};
   var geoLayer = L.geoJSON(DATA, {
     style: function () { return STYLE.base; },
     onEachFeature: function (feature, layer) {
       var num = feature.properties.num;
       layersByNum[num] = layer;
+      propsByNum[num] = feature.properties;
       layer.on("click", function () { onGuess(num); });
       // desktop hover affordance
       layer.on("mouseover", function () {
-        if (!state.locked && state.playing) layer.setStyle({ fillColor: "oklch(22.0% 0.050 309.0)" });
+        if (!state.locked && state.playing) layer.setStyle(STYLE.hover);
       });
       layer.on("mouseout", function () {
         if (!state.locked && state.playing && num !== (state.current && state.current.num))
@@ -109,7 +114,13 @@
 
   var toastTimer = null;
   function toast(msg, sub, kind) {
-    el.toast.innerHTML = msg + (sub ? '<span class="t-sub">' + sub + "</span>" : "");
+    el.toast.textContent = msg;
+    if (sub) {
+      var span = document.createElement("span");
+      span.className = "t-sub";
+      span.textContent = sub;
+      el.toast.appendChild(span);
+    }
     el.toast.className = "show " + (kind || "");
     clearTimeout(toastTimer);
     toastTimer = setTimeout(function () { el.toast.className = "hidden"; }, 1600);
@@ -210,7 +221,6 @@
     state.locked = true;
     state.answered++;
     var target = state.current;
-    var picked = byNum(num);
 
     if (num === target.num) {
       layersByNum[num].setStyle(STYLE.correct);
@@ -224,7 +234,7 @@
       layersByNum[target.num].setStyle(STYLE.reveal);
       state.streak = 0;
       state.missed.push(target.name);
-      toast("That was " + picked.name, target.name + " is highlighted in orange", "bad");
+      toast("That was " + byNum(num).name, target.name + " is highlighted", "bad");
       setTimeout(nextRound, 1900);
     }
     el.score.textContent = state.correct + " correct";
@@ -249,9 +259,7 @@
   }
 
   function byNum(num) {
-    for (var i = 0; i < DATA.features.length; i++)
-      if (DATA.features[i].properties.num === num) return DATA.features[i].properties;
-    return { name: "?", side: "?" };
+    return propsByNum[num] || { name: "?", side: "?" };
   }
 
   function endGame() {

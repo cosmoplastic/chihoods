@@ -38,6 +38,17 @@
   --good: #22c55e;
   --bad:  #ef4444;
 
+  /* map tile states — single source of truth, read by game.js via getComputedStyle */
+  --tile-base:         oklch(13.2% 0.038 309.0); /* ~20% brighter than --bg so areas stand out */
+  --tile-base-line:    var(--color-primary-400);
+  --tile-hover:        oklch(22.0% 0.050 309.0); /* clearly brighter than base on hover */
+  --tile-correct:      #16a34a;
+  --tile-correct-line: var(--good);
+  --tile-wrong:        #b91c1c;
+  --tile-wrong-line:   var(--bad);
+  --tile-reveal:       var(--color-secondary-500);
+  --tile-reveal-line:  var(--color-secondary-400);
+
   --font-12: 12px;
   --font-14: 14px;
   --font-16: 16px;
