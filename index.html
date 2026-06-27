@@ -1,110 +1,156 @@
 <!DOCTYPE html>
-<!-- VendorFlow chicago-neighborhoods v1.1 -->
+<!--  chicago-neighborhoods v1.1 -->
 <!-- v1.1: optional CTA 'L' rail-line overlay (toggle in HUD).
      v1.0: tap-the-map quiz of Chicago's 77 official community areas. Self-contained,
      offline-capable (Leaflet vendored locally, no map tiles). Mobile-first. -->
 <html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#07020d" />
-  <title>Chicago Neighborhoods — Learn the Map</title>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07020d" />
+    <title>Chicago Neighborhoods — Learn the Map</title>
 
-  <!-- Favicon + iOS "Add to Home Screen" icon. iOS uses apple-touch-icon (not the
+    <!-- Favicon + iOS "Add to Home Screen" icon. iOS uses apple-touch-icon (not the
        favicon or any manifest) for the home-screen tile, and flattens transparency
        onto a background, so apple-touch-icon.png is a pre-flattened opaque 180×180. -->
-  <link rel="icon" type="image/png" href="assets/icon.png" />
-  <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
-  <meta name="apple-mobile-web-app-title" content="ChicagoHoods" />
+    <link rel="icon" type="image/png" href="assets/icon.png" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
+    <meta name="apple-mobile-web-app-title" content="ChicagoHoods" />
 
-  <!-- Launch fullscreen (no Safari chrome) when opened from the home screen.
+    <!-- Launch fullscreen (no Safari chrome) when opened from the home screen.
        black-translucent lets the map bleed under the status bar; the HUD already
        pads for it via the safe-area-inset (--safe-t) variables in style.css. -->
-  <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent" />
 
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="vendor/leaflet.css" />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <div id="map" aria-label="Map of Chicago community areas"></div>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      rel="stylesheet" />
+    <link rel="stylesheet" href="vendor/leaflet.css" />
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div id="map" aria-label="Map of Chicago community areas"></div>
 
-  <!-- Top HUD: progress & controls -->
-  <header id="hud" class="hidden">
-    <div class="hud-row hud-meta">
-      <span id="progress" class="meta-chip">0 / 0</span>
-      <span id="score" class="meta-chip">0 correct</span>
-      <span id="streak" class="meta-chip">🔥 0</span>
-      <button id="l-toggle" class="ghost-btn l-toggle active" type="button" aria-pressed="true" aria-label="Toggle the L train overlay" title="Show/hide the ‘L’">Ⓛ</button>
-    </div>
-  </header>
-
-  <!-- Bottom controls during play -->
-  <footer id="controls" class="hidden">
-    <div class="prompt-section">
-      <div class="prompt">
-        <span class="prompt-label">Find</span>
-        <span id="target" class="prompt-name">—</span>
-        <span id="target-sub" class="prompt-sub"></span>
+    <!-- Top HUD: progress & controls -->
+    <header id="hud" class="hidden">
+      <div class="hud-row hud-meta">
+        <span id="progress" class="meta-chip">0 / 0</span>
+        <span id="score" class="meta-chip">0 correct</span>
+        <span id="streak" class="meta-chip">🔥 0</span>
+        <button id="l-toggle" class="ghost-btn l-toggle active" type="button"
+          aria-pressed="true" aria-label="Toggle the L train overlay"
+          title="Show/hide the ‘L’">Ⓛ</button>
       </div>
-    </div>
-    <div class="button-row">
-      <button id="hint-btn" class="ghost-btn" type="button" aria-label="Hint">Hint</button>
-      <button id="skip-btn" class="ghost-btn" type="button">Skip — show me</button>
-    </div>
-  </footer>
+    </header>
 
-  <div id="toast" class="hidden" role="status" aria-live="polite"></div>
-
-  <!-- Start screen -->
-  <div id="start-screen" class="overlay">
-    <div class="card">
-      <h1 class="title">Chicago<span class="accent">Hoods</span></h1>
-      <p class="subtitle">Tap the highlighted neighborhood on the map. Learn all 77 community areas before you move back.</p>
-
-      <div class="opt-group">
-        <label class="opt-label">Region</label>
-        <select id="region-select" class="select"></select>
-      </div>
-
-      <div class="opt-group">
-        <label class="opt-label">Length</label>
-        <div class="segmented" id="length-seg" role="radiogroup">
-          <button class="seg" data-len="10" role="radio" aria-checked="true">Quick · 10</button>
-          <button class="seg active" data-len="all" role="radio" aria-checked="false">Full set</button>
+    <!-- Bottom controls during play -->
+    <footer id="controls" class="hidden">
+      <!-- Tap mode: name shown, tap the map -->
+      <div id="tap-controls">
+        <div class="prompt-section">
+          <div class="prompt">
+            <span class="prompt-label">Find</span>
+            <span id="target" class="prompt-name">—</span>
+            <span id="target-sub" class="prompt-sub"></span>
+          </div>
+        </div>
+        <div class="button-row">
+          <button id="hint-btn" class="ghost-btn" type="button"
+            aria-label="Hint">Hint</button>
+          <button id="skip-btn" class="ghost-btn" type="button">Skip — show
+            me</button>
         </div>
       </div>
 
-      <button id="start-btn" class="primary-btn" type="button">Start</button>
-      <p class="footnote" id="best-line"></p>
-      <button id="export-btn" class="ghost-btn" type="button" style="margin-top: 1rem;">Export scores (JSON)</button>
-    </div>
-  </div>
-
-  <!-- End screen -->
-  <div id="end-screen" class="overlay hidden">
-    <div class="card">
-      <h2 class="title small">Round complete</h2>
-      <div class="result-grid">
-        <div class="result-stat"><span id="r-score" class="result-num">0</span><span class="result-cap">correct</span></div>
-        <div class="result-stat"><span id="r-acc" class="result-num">0%</span><span class="result-cap">accuracy</span></div>
-        <div class="result-stat"><span id="r-streak" class="result-num">0</span><span class="result-cap">best streak</span></div>
+      <!-- Choice mode: area highlighted on the map, pick its name -->
+      <div id="choice-controls" class="hidden">
+        <div class="prompt-section">
+          <div class="prompt">
+            <span class="prompt-label">Name the highlighted area</span>
+          </div>
+        </div>
+        <div id="choices" class="choices-grid"></div>
+        <div class="button-row">
+          <button id="choice-skip-btn" class="ghost-btn" type="button">Skip —
+            show me</button>
+        </div>
       </div>
-      <div id="missed-wrap" class="missed-wrap hidden">
-        <p class="missed-title">Worth another look</p>
-        <ul id="missed-list" class="missed-list"></ul>
-      </div>
-      <button id="again-btn" class="primary-btn" type="button">Play again</button>
-    </div>
-  </div>
+    </footer>
 
-  <script src="vendor/leaflet.js"></script>
-  <script src="data/community-areas.js"></script>
-  <script src="data/cta-l-lines.js"></script>
-  <script src="game.js"></script>
-</body>
+    <div id="toast" class="hidden" role="status" aria-live="polite"></div>
+
+    <!-- Start screen -->
+    <div id="start-screen" class="overlay">
+      <div class="card">
+        <h1 class="title">Chicago<span class="accent">Hoods</span></h1>
+        <p class="subtitle">Tap the highlighted neighborhood on the map. Learn
+          all 77 community areas before you move back.</p>
+
+        <div class="opt-group">
+          <label class="opt-label">Mode</label>
+          <div class="segmented" id="mode-seg" role="radiogroup">
+            <button class="seg active" data-mode="tap" role="radio"
+              aria-checked="true">Find on map</button>
+            <button class="seg" data-mode="choice" role="radio"
+              aria-checked="false">Name the area</button>
+          </div>
+        </div>
+
+        <div class="opt-group">
+          <label class="opt-label">Region</label>
+          <select id="region-select" class="select"></select>
+        </div>
+
+        <div class="opt-group">
+          <label class="opt-label">Length</label>
+          <div class="segmented" id="length-seg" role="radiogroup">
+            <button class="seg" data-len="10" role="radio"
+              aria-checked="true">Quick · 10</button>
+            <button class="seg active" data-len="all" role="radio"
+              aria-checked="false">Full set</button>
+          </div>
+        </div>
+
+        <button id="start-btn" class="primary-btn" type="button">Start</button>
+        <p class="footnote" id="best-line"></p>
+        <button id="export-btn" class="ghost-btn" type="button"
+          style="margin-top: 1rem;">Export scores (JSON)</button>
+      </div>
+    </div>
+
+    <!-- End screen -->
+    <div id="end-screen" class="overlay hidden">
+      <div class="card">
+        <h2 class="title small">Round complete</h2>
+        <div class="result-grid">
+          <div class="result-stat"><span id="r-score"
+              class="result-num">0</span><span
+              class="result-cap">correct</span></div>
+          <div class="result-stat"><span id="r-acc"
+              class="result-num">0%</span><span
+              class="result-cap">accuracy</span></div>
+          <div class="result-stat"><span id="r-streak"
+              class="result-num">0</span><span class="result-cap">best
+              streak</span></div>
+        </div>
+        <div id="missed-wrap" class="missed-wrap hidden">
+          <p class="missed-title">Worth another look</p>
+          <ul id="missed-list" class="missed-list"></ul>
+        </div>
+        <button id="again-btn" class="primary-btn" type="button">Play
+          again</button>
+      </div>
+    </div>
+
+    <script src="vendor/leaflet.js"></script>
+    <script src="data/community-areas.js"></script>
+    <script src="data/cta-l-lines.js"></script>
+    <script src="game.js"></script>
+  </body>
 </html>

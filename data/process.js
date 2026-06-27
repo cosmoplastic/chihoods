@@ -59,7 +59,7 @@ for (const f of g.features) {
 if (seen.size !== 77) throw new Error("Expected 77 areas, got " + seen.size);
 out.features.sort((a, b) => a.properties.num - b.properties.num);
 
-const js = "// VendorFlow chicago-neighborhoods v1.0 — Chicago's 77 official community areas.\n" +
+const js = "//  chicago-neighborhoods v1.0 — Chicago's 77 official community areas.\n" +
   "// Source: City of Chicago open data (Boundaries - Community Areas). Coordinates\n" +
   "// trimmed to 5 decimal places (~1m). Do not hand-edit; regenerate via process.js.\n" +
   "window.CHICAGO_COMMUNITY_AREAS = " + JSON.stringify(out) + ";\n";

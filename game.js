@@ -31,17 +31,20 @@
     hover:   { fillColor: cssVar("--tile-hover") },
     correct: { fillColor: cssVar("--tile-correct"), color: cssVar("--tile-correct-line"), weight: 2,   fillOpacity: 0.9  },
     wrong:   { fillColor: cssVar("--tile-wrong"),   color: cssVar("--tile-wrong-line"),   weight: 2,   fillOpacity: 0.9  },
-    reveal:  { fillColor: cssVar("--tile-reveal"),  color: cssVar("--tile-reveal-line"),  weight: 2.5, fillOpacity: 0.92 }
+    reveal:  { fillColor: cssVar("--tile-reveal"),  color: cssVar("--tile-reveal-line"),  weight: 2.5, fillOpacity: 0.92 },
+    // "ask" — highlights the mystery area in multiple-choice mode (the question)
+    ask:     { fillColor: cssVar("--tile-ask"),     color: cssVar("--tile-ask-line"),     weight: 3,   fillOpacity: 0.92 }
   };
 
   // ----- DOM -----
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     hud: $("hud"), controls: $("controls"),
+    tapControls: $("tap-controls"), choiceControls: $("choice-controls"), choices: $("choices"),
     target: $("target"), targetSub: $("target-sub"), progress: $("progress"), score: $("score"), streak: $("streak"),
-    toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"),
+    toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"), choiceSkipBtn: $("choice-skip-btn"),
     startScreen: $("start-screen"), endScreen: $("end-screen"), lToggle: $("l-toggle"),
-    regionSelect: $("region-select"), lengthSeg: $("length-seg"),
+    regionSelect: $("region-select"), lengthSeg: $("length-seg"), modeSeg: $("mode-seg"),
     startBtn: $("start-btn"), againBtn: $("again-btn"), bestLine: $("best-line"),
     rScore: $("r-score"), rAcc: $("r-acc"), rStreak: $("r-streak"),
     missedWrap: $("missed-wrap"), missedList: $("missed-list")
@@ -64,12 +67,12 @@
       layersByNum[num] = layer;
       propsByNum[num] = feature.properties;
       layer.on("click", function () { onGuess(num); });
-      // desktop hover affordance
+      // desktop hover affordance (tap mode only — choice mode isn't map-clickable)
       layer.on("mouseover", function () {
-        if (!state.locked && state.playing) layer.setStyle(STYLE.hover);
+        if (state.mode === "tap" && !state.locked && state.playing) layer.setStyle(STYLE.hover);
       });
       layer.on("mouseout", function () {
-        if (!state.locked && state.playing && num !== (state.current && state.current.num))
+        if (state.mode === "tap" && !state.locked && state.playing && num !== (state.current && state.current.num))
           layer.setStyle(STYLE.base);
       });
     }
@@ -99,10 +102,10 @@
 
   // ----- state -----
   var state = {
-    queue: [], current: null, total: 0, answered: 0,
+    queue: [], pool: [], current: null, total: 0, answered: 0,
     correct: 0, streak: 0, bestStreak: 0, missed: [],
     locked: false, playing: false,
-    region: "all", length: "10"
+    region: "all", length: "10", mode: "tap"
   };
 
   // ----- helpers -----
@@ -122,6 +125,10 @@
   function selectedLength() {
     var btn = el.lengthSeg.querySelector(".seg.active");
     return btn ? btn.dataset.len : "10";
+  }
+  function selectedMode() {
+    var btn = el.modeSeg.querySelector(".seg.active");
+    return btn ? btn.dataset.mode : "tap";
   }
   function resetStyles() {
     for (var n in layersByNum) layersByNum[n].setStyle(STYLE.base);
@@ -203,21 +210,35 @@
     var region = el.regionSelect.value;
     var pool = featuresFor(region);
     var len = selectedLength();
+    var mode = selectedMode();
     var q = shuffle(pool);
     if (len !== "all") q = q.slice(0, Math.min(parseInt(len, 10), q.length));
 
     state.queue = q;
+    state.pool = pool;
     state.total = q.length;
     state.answered = 0; state.correct = 0; state.streak = 0; state.bestStreak = 0;
     state.missed = []; state.playing = true;
-    state.region = region; state.length = len;
+    state.region = region; state.length = len; state.mode = mode;
+
+    // swap the bottom UI to match the mode
+    var choice = mode === "choice";
+    el.tapControls.classList.toggle("hidden", choice);
+    el.choiceControls.classList.toggle("hidden", !choice);
 
     el.startScreen.classList.add("hidden");
     el.endScreen.classList.add("hidden");
     el.hud.classList.remove("hidden");
     el.controls.classList.remove("hidden");
-    map.flyToBounds(HOME, { padding: [16, 16], duration: 0.5 });
+    // tap mode views the whole city; choice mode zooms to each target in setup
+    if (!choice) map.flyToBounds(HOME, { padding: [16, 16], duration: 0.5 });
     nextRound();
+  }
+
+  function updateChips() {
+    el.progress.textContent = (state.answered + 1) + " / " + state.total;
+    el.score.textContent = state.correct + " correct";
+    el.streak.textContent = "🔥 " + state.streak;
   }
 
   function nextRound() {
@@ -225,24 +246,26 @@
     state.locked = false;
     if (!state.queue.length) { return endGame(); }
     state.current = state.queue.shift();
+    updateChips();
+    if (state.mode === "choice") setupChoiceRound();
+    else setupTapRound();
+  }
+
+  // ----- tap mode: name shown, tap the map -----
+  function setupTapRound() {
     el.target.textContent = displayName(state.current);
     el.targetSub.textContent = ALIASES[state.current.num] ? state.current.name : "";
-    el.progress.textContent = (state.answered + 1) + " / " + state.total;
-    el.score.textContent = state.correct + " correct";
-    el.streak.textContent = "🔥 " + state.streak;
   }
 
   function onGuess(num) {
-    if (state.locked || !state.playing || !state.current) return;
+    if (state.mode !== "tap" || state.locked || !state.playing || !state.current) return;
     state.locked = true;
     state.answered++;
     var target = state.current;
 
     if (num === target.num) {
       layersByNum[num].setStyle(STYLE.correct);
-      state.correct++;
-      state.streak++;
-      if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+      scoreCorrect();
       var goodSub = ALIASES[target.num]
         ? displayName(target) + " · " + target.name
         : target.name + " · " + target.side + " Side";
@@ -251,8 +274,7 @@
     } else {
       layersByNum[num].setStyle(STYLE.wrong);
       layersByNum[target.num].setStyle(STYLE.reveal);
-      state.streak = 0;
-      state.missed.push(displayName(target));
+      scoreMiss(target);
       toast("That was " + displayName(byNum(num)), displayName(target) + " is highlighted", "bad");
       setTimeout(nextRound, 1900);
     }
@@ -260,14 +282,91 @@
     el.streak.textContent = "🔥 " + state.streak;
   }
 
+  // ----- choice mode: area highlighted, pick its name from four options -----
+  function setupChoiceRound() {
+    var target = state.current;
+    layersByNum[target.num].setStyle(STYLE.ask);
+    // zoom in so the highlighted area is clearly visible, but keep surrounding
+    // context (generous padding + a maxZoom cap so tiny downtown areas aren't
+    // blown up past their neighbors)
+    map.flyToBounds(layersByNum[target.num].getBounds(), {
+      padding: [70, 70], maxZoom: 12.5, duration: 0.6
+    });
+
+    // correct answer + up to three distractors from the same pool
+    var others = shuffle(state.pool.filter(function (p) { return p.num !== target.num; })).slice(0, 3);
+    var options = shuffle([target].concat(others));
+
+    el.choices.innerHTML = "";
+    options.forEach(function (opt) {
+      var btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "choice-btn";
+      btn.textContent = displayName(opt);
+      btn.dataset.num = opt.num;
+      btn.addEventListener("click", function () { onChoice(opt.num); });
+      el.choices.appendChild(btn);
+    });
+  }
+
+  function onChoice(num) {
+    if (state.mode !== "choice" || state.locked || !state.playing || !state.current) return;
+    state.locked = true;
+    state.answered++;
+    var target = state.current;
+
+    // the highlighted area IS the correct answer — confirm it in green either way
+    layersByNum[target.num].setStyle(STYLE.correct);
+
+    // mark the option buttons and disable further taps
+    var btns = el.choices.querySelectorAll(".choice-btn");
+    btns.forEach(function (b) {
+      b.disabled = true;
+      var bn = parseInt(b.dataset.num, 10);
+      if (bn === target.num) b.classList.add("correct");
+      else if (bn === num) b.classList.add("wrong");
+    });
+
+    if (num === target.num) {
+      scoreCorrect();
+      toast("Correct!", displayName(target), "good");
+      setTimeout(nextRound, 950);
+    } else {
+      scoreMiss(target);
+      toast("That's " + displayName(target), "You picked " + displayName(byNum(num)), "bad");
+      setTimeout(nextRound, 1900);
+    }
+    el.score.textContent = state.correct + " correct";
+    el.streak.textContent = "🔥 " + state.streak;
+  }
+
+  // shared scoring side-effects
+  function scoreCorrect() {
+    state.correct++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+  }
+  function scoreMiss(target) {
+    state.streak = 0;
+    state.missed.push(displayName(target));
+  }
+
   function skip() {
     if (state.locked || !state.playing || !state.current) return;
     state.locked = true;
     state.answered++;
-    state.streak = 0;
-    state.missed.push(displayName(state.current));
-    layersByNum[state.current.num].setStyle(STYLE.reveal);
-    toast("This one", displayName(state.current), "bad");
+    var target = state.current;
+    scoreMiss(target);
+    if (state.mode === "choice") {
+      layersByNum[target.num].setStyle(STYLE.correct);
+      el.choices.querySelectorAll(".choice-btn").forEach(function (b) {
+        b.disabled = true;
+        if (parseInt(b.dataset.num, 10) === target.num) b.classList.add("correct");
+      });
+    } else {
+      layersByNum[target.num].setStyle(STYLE.reveal);
+    }
+    toast("This one", displayName(target), "bad");
     el.streak.textContent = "🔥 0";
     setTimeout(nextRound, 1600);
   }
@@ -318,15 +417,22 @@
     el.startScreen.classList.remove("hidden");
   });
   el.skipBtn.addEventListener("click", skip);
+  el.choiceSkipBtn.addEventListener("click", skip);
   el.hintBtn.addEventListener("click", hint);
   el.lToggle.addEventListener("click", toggleL);
   document.getElementById("export-btn").addEventListener("click", exportScores);
-  el.lengthSeg.addEventListener("click", function (e) {
-    var seg = e.target.closest(".seg");
-    if (!seg) return;
-    el.lengthSeg.querySelectorAll(".seg").forEach(function (s) {
-      s.classList.toggle("active", s === seg);
-      s.setAttribute("aria-checked", s === seg ? "true" : "false");
+
+  // single-select segmented controls (Length, Mode)
+  function wireSegmented(container) {
+    container.addEventListener("click", function (e) {
+      var seg = e.target.closest(".seg");
+      if (!seg) return;
+      container.querySelectorAll(".seg").forEach(function (s) {
+        s.classList.toggle("active", s === seg);
+        s.setAttribute("aria-checked", s === seg ? "true" : "false");
+      });
     });
-  });
+  }
+  wireSegmented(el.lengthSeg);
+  wireSegmented(el.modeSeg);
 })();
