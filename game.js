@@ -286,11 +286,11 @@
   function setupChoiceRound() {
     var target = state.current;
     layersByNum[target.num].setStyle(STYLE.ask);
-    // zoom in so the highlighted area is clearly visible, but keep surrounding
-    // context (generous padding + a maxZoom cap so tiny downtown areas aren't
-    // blown up past their neighbors)
+    // ease toward the highlighted area, but keep plenty of city context so you can
+    // tell where it sits (lakeshore, neighbors). A low maxZoom cap is what keeps
+    // tiny downtown areas from filling the screen on mobile.
     map.flyToBounds(layersByNum[target.num].getBounds(), {
-      padding: [70, 70], maxZoom: 12.5, duration: 0.6
+      padding: [60, 60], maxZoom: 11, duration: 0.6
     });
 
     // correct answer + up to three distractors from the same pool
