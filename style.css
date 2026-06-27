@@ -1,7 +1,6 @@
 /* VendorFlow chicago-neighborhoods v1.1
    v1.1: '.l-toggle' pill for the CTA 'L' overlay.
-   Mobile-first styles. Orange-on-warm-dark, echoing the VendorFlow design DNA
-   (--orange #f97316 on an OKLCH warm-neutral dark ramp). */
+   Mobile-first styles. Purple-violet color scheme with secondary accent palette. */
 
 :root {
   /* primary & secondary color palettes */
