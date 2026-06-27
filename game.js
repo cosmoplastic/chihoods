@@ -46,7 +46,7 @@
       layer.on("click", function () { onGuess(num); });
       // desktop hover affordance
       layer.on("mouseover", function () {
-        if (!state.locked && state.playing) layer.setStyle({ fillColor: "#3a2d25" });
+        if (!state.locked && state.playing) layer.setStyle({ fillColor: "oklch(9.8% 0.049 311.2)" });
       });
       layer.on("mouseout", function () {
         if (!state.locked && state.playing && num !== (state.current && state.current.num))
