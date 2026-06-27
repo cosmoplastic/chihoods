@@ -17,6 +17,13 @@
   <link rel="apple-touch-icon" href="assets/apple-touch-icon.png" />
   <meta name="apple-mobile-web-app-title" content="ChicagoHoods" />
 
+  <!-- Launch fullscreen (no Safari chrome) when opened from the home screen.
+       black-translucent lets the map bleed under the status bar; the HUD already
+       pads for it via the safe-area-inset (--safe-t) variables in style.css. -->
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
