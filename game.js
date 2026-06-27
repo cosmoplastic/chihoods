@@ -315,9 +315,6 @@
     state.answered++;
     var target = state.current;
 
-    // the highlighted area IS the correct answer — confirm it in green either way
-    layersByNum[target.num].setStyle(STYLE.correct);
-
     // mark the option buttons and disable further taps
     var btns = el.choices.querySelectorAll(".choice-btn");
     btns.forEach(function (b) {
@@ -328,10 +325,12 @@
     });
 
     if (num === target.num) {
+      layersByNum[target.num].setStyle(STYLE.correct); // green only when right
       scoreCorrect();
       toast("Correct!", displayName(target), "good");
       setTimeout(nextRound, 950);
     } else {
+      layersByNum[target.num].setStyle(STYLE.reveal);  // neutral "here's the answer"
       scoreMiss(target);
       toast("That's " + displayName(target), "You picked " + displayName(byNum(num)), "bad");
       setTimeout(nextRound, 1900);
@@ -358,7 +357,7 @@
     var target = state.current;
     scoreMiss(target);
     if (state.mode === "choice") {
-      layersByNum[target.num].setStyle(STYLE.correct);
+      layersByNum[target.num].setStyle(STYLE.reveal);
       el.choices.querySelectorAll(".choice-btn").forEach(function (b) {
         b.disabled = true;
         if (parseInt(b.dataset.num, 10) === target.num) b.classList.add("correct");
