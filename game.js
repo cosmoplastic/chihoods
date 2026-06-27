@@ -10,10 +10,10 @@
 
   // ----- polygon styling (kept in JS so we can setStyle on Leaflet paths) -----
   var STYLE = {
-    base:    { fillColor: "#2a211c", color: "#6b574a", weight: 1,   fillOpacity: 0.82 },
+    base:    { fillColor: "oklch(10.7% 0.043 312.2)", color: "oklch(47.0% 0.044 311.7)", weight: 1,   fillOpacity: 0.82 },
     correct: { fillColor: "#16a34a", color: "#22c55e", weight: 2,   fillOpacity: 0.9  },
     wrong:   { fillColor: "#b91c1c", color: "#ef4444", weight: 2,   fillOpacity: 0.9  },
-    reveal:  { fillColor: "#f97316", color: "#fb923c", weight: 2.5, fillOpacity: 0.92 }
+    reveal:  { fillColor: "oklch(18.8% 0.100 300.2)", color: "oklch(52.4% 0.087 300.1)", weight: 2.5, fillOpacity: 0.92 }
   };
 
   // ----- DOM -----
