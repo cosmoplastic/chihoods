@@ -28,9 +28,9 @@
 
   /* semantic color mappings */
   --bg: var(--color-primary-800);
-  --surface: var(--color-primary-400);
+  --surface: var(--color-primary-800);
   --surface-2: var(--color-primary-600);
-  --line: var(--color-primary-400);
+  --line: var(--color-primary-700);
   --ink: var(--color-primary-50);
   --ink-dim: var(--color-primary-200);
 
@@ -398,14 +398,14 @@ body {
   font-size: var(--font-16);
   font-weight: 700;
   color: white;
-  background: var(--purple);
+  background: var(--color-secondary-500);
   border: none;
   border-radius: 14px;
   padding: 15px;
   cursor: pointer;
 }
 .primary-btn:active {
-  background: var(--purple-soft);
+  background: var(--color-secondary-600);
 }
 
 .footnote {
