@@ -23,6 +23,11 @@ It's a plain static page — no build step, no backend, works offline.
   no CDN dependency and it runs offline). **No base map tiles** are used on purpose —
   street labels would give the answers away — so only the neighborhood polygons are
   drawn on a dark canvas.
+- **CTA 'L' overlay:** the eight 'L' routes are drawn over the map in their official
+  colors as an orientation aid (the lines converge on the Loop). Toggle them with the
+  **Ⓛ** button in the top bar. The overlay is non-interactive, so taps always fall
+  through to the neighborhood beneath. Data: `data/cta-l-lines.js` (GTFS-derived
+  geometry, `window.CTA_L_LINES`).
 - **Data:** `data/community-areas.js` — Chicago's 77 community-area boundaries as
   GeoJSON, assigned to `window.CHICAGO_COMMUNITY_AREAS`. Loaded via a `<script>` tag
   (not `fetch`) so it works from `file://` with no CORS headaches. Each feature carries

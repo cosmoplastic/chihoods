@@ -1,4 +1,5 @@
-/* VendorFlow chicago-neighborhoods v1.0
+/* VendorFlow chicago-neighborhoods v1.1
+   v1.1: '.l-toggle' pill for the CTA 'L' overlay.
    Mobile-first styles. Orange-on-warm-dark, echoing the VendorFlow design DNA
    (--orange #f97316 on an OKLCH warm-neutral dark ramp). */
 
@@ -104,6 +105,14 @@ html, body {
 }
 .ghost-btn:active { background: var(--surface-2); }
 .ghost-btn.wide { width: 100%; max-width: 420px; }
+
+/* 'L' overlay toggle — compact circular pill */
+.l-toggle {
+  flex: 0 0 auto; width: 38px; height: 38px; padding: 0;
+  font-size: 18px; line-height: 1; border-radius: 999px;
+  color: var(--ink-dim);
+}
+.l-toggle.active { color: var(--orange); border-color: var(--orange); }
 
 /* ---------- toast ---------- */
 #toast {

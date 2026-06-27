@@ -1,4 +1,5 @@
-/* VendorFlow chicago-neighborhoods v1.0
+/* VendorFlow chicago-neighborhoods v1.1
+   v1.1: optional CTA 'L' rail-line overlay (non-interactive, toggleable).
    Tap-the-map quiz engine for Chicago's 77 community areas.
    State machine: start screen -> rounds -> end screen. No build step, no backend. */
 (function () {
@@ -21,7 +22,7 @@
     map: $("map"), hud: $("hud"), controls: $("controls"),
     target: $("target"), progress: $("progress"), score: $("score"), streak: $("streak"),
     toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"),
-    startScreen: $("start-screen"), endScreen: $("end-screen"),
+    startScreen: $("start-screen"), endScreen: $("end-screen"), lToggle: $("l-toggle"),
     regionSelect: $("region-select"), lengthSeg: $("length-seg"),
     startBtn: $("start-btn"), againBtn: $("again-btn"), bestLine: $("best-line"),
     rScore: $("r-score"), rAcc: $("r-acc"), rStreak: $("r-streak"),
@@ -53,6 +54,25 @@
       });
     }
   }).addTo(map);
+
+  // CTA 'L' overlay — orientation aid only. Non-interactive so taps fall through
+  // to the neighborhood polygons beneath. Each route drawn in its official color.
+  var lLayer = window.CTA_L_LINES ? L.geoJSON(window.CTA_L_LINES, {
+    interactive: false,
+    style: function (f) {
+      return { color: f.properties.color, weight: 3, opacity: 0.95, lineCap: "round", lineJoin: "round" };
+    }
+  }) : null;
+  var lVisible = true;
+  if (lLayer) lLayer.addTo(map);
+
+  function toggleL() {
+    if (!lLayer) return;
+    lVisible = !lVisible;
+    if (lVisible) lLayer.addTo(map); else map.removeLayer(lLayer);
+    el.lToggle.classList.toggle("active", lVisible);
+    el.lToggle.setAttribute("aria-pressed", lVisible ? "true" : "false");
+  }
 
   map.fitBounds(geoLayer.getBounds(), { padding: [16, 16] });
   var HOME = map.getBounds();
@@ -232,6 +252,7 @@
   });
   el.skipBtn.addEventListener("click", skip);
   el.hintBtn.addEventListener("click", hint);
+  el.lToggle.addEventListener("click", toggleL);
   el.lengthSeg.addEventListener("click", function (e) {
     var seg = e.target.closest(".seg");
     if (!seg) return;

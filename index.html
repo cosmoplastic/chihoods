@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!-- VendorFlow chicago-neighborhoods v1.0 -->
-<!-- Tap-the-map quiz of Chicago's 77 official community areas. Self-contained,
+<!-- VendorFlow chicago-neighborhoods v1.1 -->
+<!-- v1.1: optional CTA 'L' rail-line overlay (toggle in HUD).
+     v1.0: tap-the-map quiz of Chicago's 77 official community areas. Self-contained,
      offline-capable (Leaflet vendored locally, no map tiles). Mobile-first. -->
 <html lang="en">
 <head>
@@ -24,6 +25,7 @@
         <span class="prompt-label">Find</span>
         <span id="target" class="prompt-name">—</span>
       </div>
+      <button id="l-toggle" class="ghost-btn l-toggle active" type="button" aria-pressed="true" aria-label="Toggle the L train overlay" title="Show/hide the ‘L’">Ⓛ</button>
       <button id="hint-btn" class="ghost-btn" type="button" aria-label="Hint">Hint</button>
     </div>
     <div class="hud-row hud-meta">
@@ -83,6 +85,7 @@
 
   <script src="vendor/leaflet.js"></script>
   <script src="data/community-areas.js"></script>
+  <script src="data/cta-l-lines.js"></script>
   <script src="game.js"></script>
 </body>
 </html>
