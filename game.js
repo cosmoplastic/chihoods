@@ -287,10 +287,15 @@
     var target = state.current;
     layersByNum[target.num].setStyle(STYLE.ask);
     // ease toward the highlighted area, but keep plenty of city context so you can
-    // tell where it sits (lakeshore, neighbors). A low maxZoom cap is what keeps
-    // tiny downtown areas from filling the screen on mobile.
-    map.flyToBounds(layersByNum[target.num].getBounds(), {
-      padding: [60, 60], maxZoom: 11, duration: 0.6
+    // tell where it sits (lakeshore, neighbors). Small areas hit the maxZoom cap;
+    // at a fixed zoom a wide desktop viewport shows more geography (area looks tiny)
+    // than a phone, so the cap is responsive: looser on mobile, tighter on desktop.
+    var vw = window.innerWidth || document.documentElement.clientWidth || 1024;
+    var maxZoom = vw >= 720 ? 12.5 : 11;
+    // fitBounds (not flyToBounds): the fly trajectory math throws "Invalid LatLng
+    // (NaN, NaN)" for some center/zoom combos; fitBounds animates without it.
+    map.fitBounds(layersByNum[target.num].getBounds(), {
+      padding: [60, 60], maxZoom: maxZoom, animate: true, duration: 0.6
     });
 
     // correct answer + up to three distractors from the same pool
