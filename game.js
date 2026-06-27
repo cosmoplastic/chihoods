@@ -10,7 +10,7 @@
 
   // ----- polygon styling (kept in JS so we can setStyle on Leaflet paths) -----
   var STYLE = {
-    base:    { fillColor: "oklch(10.7% 0.043 312.2)", color: "oklch(47.0% 0.044 311.7)", weight: 1,   fillOpacity: 0.82 },
+    base:    { fillColor: "oklch(13.2% 0.038 309.0)", color: "oklch(47.0% 0.044 311.7)", weight: 1,   fillOpacity: 0.82 },
     correct: { fillColor: "#16a34a", color: "#22c55e", weight: 2,   fillOpacity: 0.9  },
     wrong:   { fillColor: "#b91c1c", color: "#ef4444", weight: 2,   fillOpacity: 0.9  },
     reveal:  { fillColor: "oklch(18.8% 0.100 300.2)", color: "oklch(52.4% 0.087 300.1)", weight: 2.5, fillOpacity: 0.92 }
@@ -46,7 +46,7 @@
       layer.on("click", function () { onGuess(num); });
       // desktop hover affordance
       layer.on("mouseover", function () {
-        if (!state.locked && state.playing) layer.setStyle({ fillColor: "oklch(9.8% 0.049 311.2)" });
+        if (!state.locked && state.playing) layer.setStyle({ fillColor: "oklch(22.0% 0.050 309.0)" });
       });
       layer.on("mouseout", function () {
         if (!state.locked && state.playing && num !== (state.current && state.current.num))
