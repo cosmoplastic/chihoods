@@ -81,7 +81,8 @@
   var state = {
     queue: [], current: null, total: 0, answered: 0,
     correct: 0, streak: 0, bestStreak: 0, missed: [],
-    locked: false, playing: false
+    locked: false, playing: false,
+    region: "all", length: "10"
   };
 
   // ----- helpers -----
@@ -125,11 +126,46 @@
     el.regionSelect.innerHTML = opts.join("");
   })();
 
-  // ----- best score (localStorage) -----
+  // ----- score history (localStorage) -----
+  var HISTORY_KEY = "chiHoods.history";
   var BEST_KEY = "chiHoods.best";
+
+  function readHistory() {
+    try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (e) { return []; }
+  }
+
+  function saveScore(score, total, streak, region, length) {
+    var history = readHistory();
+    history.push({
+      timestamp: new Date().toISOString(),
+      score: score,
+      total: total,
+      accuracy: total ? Math.round((score / total) * 100) : 0,
+      streak: streak,
+      region: region,
+      length: length
+    });
+    try { localStorage.setItem(HISTORY_KEY, JSON.stringify(history)); } catch (e) {}
+  }
+
   function readBest() {
     try { return JSON.parse(localStorage.getItem(BEST_KEY) || "{}"); } catch (e) { return {}; }
   }
+
+  function exportScores() {
+    var history = readHistory();
+    var json = JSON.stringify(history, null, 2);
+    var blob = new Blob([json], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "chicago-hoods-scores-" + new Date().toISOString().split("T")[0] + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
   function showBest() {
     var b = readBest();
     el.bestLine.textContent = b.streak ? "Best streak: " + b.streak : "Tap a highlighted shape to guess.";
@@ -148,6 +184,7 @@
     state.total = q.length;
     state.answered = 0; state.correct = 0; state.streak = 0; state.bestStreak = 0;
     state.missed = []; state.playing = true;
+    state.region = region; state.length = len;
 
     el.startScreen.classList.add("hidden");
     el.endScreen.classList.add("hidden");
@@ -235,6 +272,9 @@
       el.missedWrap.classList.add("hidden");
     }
 
+    // save score to history
+    saveScore(state.correct, state.total, state.bestStreak, state.region, state.length);
+
     // persist best streak
     var b = readBest();
     if (state.bestStreak > (b.streak || 0)) {
@@ -253,6 +293,7 @@
   el.skipBtn.addEventListener("click", skip);
   el.hintBtn.addEventListener("click", hint);
   el.lToggle.addEventListener("click", toggleL);
+  document.getElementById("export-btn").addEventListener("click", exportScores);
   el.lengthSeg.addEventListener("click", function (e) {
     var seg = e.target.closest(".seg");
     if (!seg) return;
