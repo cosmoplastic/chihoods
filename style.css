@@ -81,7 +81,7 @@ html, body {
 #hud {
   position: fixed; top: 0; left: 0; right: 0; z-index: 500;
   padding: calc(10px + var(--safe-t)) 16px 10px;
-  background: linear-gradient(180deg, rgba(20,16,13,.96) 70%, rgba(20,16,13,0));
+  background: linear-gradient(180deg, color-mix(in oklch, var(--bg) 96%, transparent) 70%, transparent);
   pointer-events: none;
   display: flex; align-items: center; justify-content: space-between;
 }
@@ -120,7 +120,7 @@ html, body {
 #controls {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
   padding: 16px 20px calc(12px + var(--safe-b));
-  background: linear-gradient(0deg, rgba(20,16,13,.98) 45%, rgba(20,16,13,0));
+  background: linear-gradient(0deg, color-mix(in oklch, var(--bg) 98%, transparent) 45%, transparent);
   display: flex; flex-direction: column; gap: 14px;
 }
 
@@ -174,7 +174,7 @@ html, body {
   position: fixed; inset: 0; z-index: 1000;
   display: flex; align-items: center; justify-content: center;
   padding: 20px; padding-top: calc(20px + var(--safe-t)); padding-bottom: calc(20px + var(--safe-b));
-  background: radial-gradient(120% 100% at 50% 0%, oklch(0.22 0.02 60) 0%, var(--bg) 70%);
+  background: radial-gradient(120% 100% at 50% 0%, var(--color-primary-600) 0%, var(--bg) 70%);
 }
 .card {
   width: 100%; max-width: 420px;
