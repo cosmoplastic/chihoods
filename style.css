@@ -60,14 +60,16 @@ html, body {
 /* ---------- HUD (top progress) ---------- */
 #hud {
   position: fixed; top: 0; left: 0; right: 0; z-index: 500;
-  padding: calc(8px + var(--safe-t)) 12px 8px;
+  padding: calc(10px + var(--safe-t)) 16px 10px;
   background: linear-gradient(180deg, rgba(20,16,13,.96) 70%, rgba(20,16,13,0));
   pointer-events: none;
+  display: flex; align-items: center; justify-content: space-between;
 }
 #hud .ghost-btn { pointer-events: auto; }
 
-.hud-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.hud-meta { gap: 8px; }
+.hud-row { display: flex; align-items: center; justify-content: flex-start; gap: 8px; }
+.hud-meta { gap: 8px; flex: 1; }
+.hud-meta .l-toggle { margin-left: auto; }
 
 .prompt {
   flex: 1; min-width: 0;
@@ -86,33 +88,38 @@ html, body {
   font-family: "DM Mono", ui-monospace, monospace;
   font-size: var(--font-12); color: var(--ink-dim);
   background: var(--surface); border: 1px solid var(--line);
-  padding: 3px 8px; border-radius: 999px;
+  padding: 6px 12px; border-radius: 999px;
+}
+@media (min-width: 720px) {
+  .meta-chip {
+    font-size: var(--font-14); padding: 8px 16px;
+  }
 }
 
 /* ---------- bottom controls ---------- */
 #controls {
   position: fixed; left: 0; right: 0; bottom: 0; z-index: 500;
-  padding: 16px 12px calc(12px + var(--safe-b));
+  padding: 16px 20px calc(12px + var(--safe-b));
   background: linear-gradient(0deg, rgba(20,16,13,.98) 45%, rgba(20,16,13,0));
-  display: flex; flex-direction: column; gap: 12px;
+  display: flex; flex-direction: column; gap: 14px;
 }
 
 .prompt-section {
-  text-align: center;
+  text-align: left;
 }
 .prompt-section .prompt {
-  flex-direction: column; gap: 4px; justify-content: center;
+  flex-direction: column; gap: 2px; justify-content: flex-start;
 }
 
 .button-row {
-  display: flex; gap: 10px; justify-content: center;
+  display: flex; gap: 12px; justify-content: flex-start;
 }
 
 .ghost-btn {
   font-family: inherit; font-size: var(--font-14); font-weight: 600;
   color: var(--ink); background: var(--surface);
   border: 1px solid var(--line); border-radius: 999px;
-  padding: 10px 20px; cursor: pointer; flex: 1; max-width: 200px;
+  padding: 10px 22px; cursor: pointer;
 }
 .ghost-btn:active { background: var(--surface-2); }
 .ghost-btn.wide { width: 100%; max-width: 420px; }
@@ -214,7 +221,25 @@ html, body {
 
 /* desktop niceties */
 @media (min-width: 720px) {
-  .prompt-name { font-size: 32px; }
-  .button-row { gap: 16px; }
-  .ghost-btn { padding: 12px 28px; max-width: none; flex: 0; }
+  #controls {
+    padding: 20px 40px calc(16px + var(--safe-b));
+  }
+
+  .prompt-section {
+    margin-bottom: 4px;
+  }
+
+  .prompt-name {
+    font-size: 36px;
+    font-weight: 700;
+  }
+
+  .button-row {
+    gap: 16px;
+  }
+
+  .ghost-btn {
+    padding: 12px 32px;
+    font-size: var(--font-16);
+  }
 }
