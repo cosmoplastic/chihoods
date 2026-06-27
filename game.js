@@ -8,6 +8,21 @@
   var DATA = window.CHICAGO_COMMUNITY_AREAS;
   if (!DATA) { alert("Neighborhood data failed to load."); return; }
 
+  // Common-name aliases, keyed by community-area number. Many official areas are
+  // better known by a neighborhood inside them; we quiz on the familiar name and
+  // show the official area as a subtitle. Edit freely — purely presentational.
+  var ALIASES = {
+    6:  "Boystown",         // Lake View
+    24: "Wicker Park",      // West Town
+    28: "West Loop",        // Near West Side
+    30: "Little Village",   // South Lawndale
+    31: "Pilsen",           // Lower West Side
+    33: "South Loop",       // Near South Side
+    34: "Chinatown",        // Armour Square
+    61: "Back of the Yards" // New City
+  };
+  function displayName(p) { return (p && (ALIASES[p.num] || p.name)) || "?"; }
+
   // ----- polygon styling (colors sourced from CSS so they live in one place) -----
   var rootStyle = getComputedStyle(document.documentElement);
   function cssVar(name) { return rootStyle.getPropertyValue(name).trim(); }
@@ -23,7 +38,7 @@
   var $ = function (id) { return document.getElementById(id); };
   var el = {
     hud: $("hud"), controls: $("controls"),
-    target: $("target"), progress: $("progress"), score: $("score"), streak: $("streak"),
+    target: $("target"), targetSub: $("target-sub"), progress: $("progress"), score: $("score"), streak: $("streak"),
     toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"),
     startScreen: $("start-screen"), endScreen: $("end-screen"), lToggle: $("l-toggle"),
     regionSelect: $("region-select"), lengthSeg: $("length-seg"),
@@ -210,7 +225,8 @@
     state.locked = false;
     if (!state.queue.length) { return endGame(); }
     state.current = state.queue.shift();
-    el.target.textContent = state.current.name;
+    el.target.textContent = displayName(state.current);
+    el.targetSub.textContent = ALIASES[state.current.num] ? state.current.name : "";
     el.progress.textContent = (state.answered + 1) + " / " + state.total;
     el.score.textContent = state.correct + " correct";
     el.streak.textContent = "🔥 " + state.streak;
@@ -227,14 +243,17 @@
       state.correct++;
       state.streak++;
       if (state.streak > state.bestStreak) state.bestStreak = state.streak;
-      toast("Correct!", target.name + " · " + target.side + " Side", "good");
+      var goodSub = ALIASES[target.num]
+        ? displayName(target) + " · " + target.name
+        : target.name + " · " + target.side + " Side";
+      toast("Correct!", goodSub, "good");
       setTimeout(nextRound, 900);
     } else {
       layersByNum[num].setStyle(STYLE.wrong);
       layersByNum[target.num].setStyle(STYLE.reveal);
       state.streak = 0;
-      state.missed.push(target.name);
-      toast("That was " + byNum(num).name, target.name + " is highlighted", "bad");
+      state.missed.push(displayName(target));
+      toast("That was " + displayName(byNum(num)), displayName(target) + " is highlighted", "bad");
       setTimeout(nextRound, 1900);
     }
     el.score.textContent = state.correct + " correct";
@@ -246,9 +265,9 @@
     state.locked = true;
     state.answered++;
     state.streak = 0;
-    state.missed.push(state.current.name);
+    state.missed.push(displayName(state.current));
     layersByNum[state.current.num].setStyle(STYLE.reveal);
-    toast("This one", state.current.name, "bad");
+    toast("This one", displayName(state.current), "bad");
     el.streak.textContent = "🔥 0";
     setTimeout(nextRound, 1600);
   }

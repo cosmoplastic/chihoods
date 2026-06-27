@@ -17,10 +17,10 @@
   --color-primary-800: oklch(11% 0.03 311.5);
 
   --color-secondary-50: oklch(95% 0.012 300);
-  --color-secondary-100: oklch(88% 0.025 300);
-  --color-secondary-200: oklch(79% 0.045 300);
-  --color-secondary-300: oklch(69% 0.068 300);
-  --color-secondary-400: oklch(57% 0.09 300);
+  --color-secondary-100: oklch(84.713% 0.04265 300.623);
+  --color-secondary-200: oklch(74.28% 0.07171 299.581);
+  --color-secondary-300: oklch(64.775% 0.10112 300.05);
+  --color-secondary-400: oklch(47.842% 0.12651 298.207);
   --color-secondary-500: oklch(45% 0.105 300);
   --color-secondary-600: oklch(34% 0.1 300);
   --color-secondary-700: oklch(22% 0.085 300);
@@ -174,6 +174,15 @@ body {
   word-wrap: break-word;
   overflow-wrap: break-word;
 }
+.prompt-sub {
+  font-size: var(--font-12);
+  font-weight: 500;
+  color: var(--ink-dim);
+  letter-spacing: 0.02em;
+}
+.prompt-sub:empty {
+  display: none;
+}
 
 .meta-chip {
   font-family: "DM Mono", ui-monospace, monospace;
@@ -312,7 +321,7 @@ body {
   padding-bottom: calc(20px + var(--safe-b));
   background: radial-gradient(
     120% 100% at 50% 0%,
-    var(--color-primary-600) 0%,
+    var(--color-primary-800) 0%,
     var(--bg) 70%
   );
 }
