@@ -279,7 +279,7 @@
   function setupTapRound() {
     el.target.textContent = displayName(state.current);
     var hint = hintText(state.current, 4);
-    el.targetSub.textContent = hint ? "incl. " + hint : "";
+    el.targetSub.textContent = hint || "";
   }
 
   function onGuess(num) {

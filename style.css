@@ -3,59 +3,51 @@
    Mobile-first styles. Purple-violet color scheme with secondary accent palette. */
 
 :root {
-  /* primary & secondary color palettes
-     Even lightness ladder (95 → 11) with locked hue per ramp and chroma
-     that peaks in the mid-tones, so 50→800 steps consistently dark. */
-  --color-primary-50: oklch(95% 0.006 311.5);
-  --color-primary-100: oklch(88% 0.013 311.5);
-  --color-primary-200: oklch(79% 0.024 311.5);
-  --color-primary-300: oklch(69% 0.036 311.5);
-  --color-primary-400: oklch(57% 0.047 311.5);
-  --color-primary-500: oklch(45% 0.052 311.5);
-  --color-primary-600: oklch(34% 0.048 311.5);
-  --color-primary-700: oklch(22% 0.04 311.5);
-  --color-primary-800: oklch(11% 0.03 311.5);
+  /* Chicago flag palette — light blue drives all UI; red is reserved for the stars. */
+  --color-primary-25:  oklch(98.0% 0.005 228.8);
+  --color-primary-50:  oklch(97.4% 0.011 226.0);
+  --color-primary-75:  oklch(96.8% 0.018 229.0);
+  --color-primary-100: oklch(95.9% 0.024 230.4);
+  --color-primary-200: oklch(93.6% 0.044 222.1);
+  --color-primary-300: oklch(89.9% 0.070 221.5);
+  --color-primary-400: oklch(83.6% 0.105 227.9);
+  --color-primary-500: oklch(73.1% 0.123 229.5);
+  --color-primary-600: oklch(64.8% 0.128 229.6);
+  --color-primary-700: oklch(53.1% 0.108 231.5);
+  --color-primary-800: oklch(39.3% 0.082 234.3);
+  --color-primary-900: oklch(24.7% 0.055 238.3);
+  --color-primary-950: oklch(17.4% 0.040 240.6);
+  --color-primary-975: oklch(13.8% 0.031 239.3);
 
-  --color-secondary-50: oklch(95% 0.012 300);
-  --color-secondary-100: oklch(84.713% 0.04265 300.623);
-  --color-secondary-200: oklch(74.28% 0.07171 299.581);
-  --color-secondary-300: oklch(64.775% 0.10112 300.05);
-  --color-secondary-400: oklch(47.842% 0.12651 298.207);
-  --color-secondary-500: oklch(45% 0.105 300);
-  --color-secondary-600: oklch(34% 0.1 300);
-  --color-secondary-700: oklch(22% 0.085 300);
-  --color-secondary-800: oklch(11% 0.065 300);
+  /* Chicago flag red — only the four stars use this */
+  --star: #ff1f38;
 
-  /* semantic color mappings */
-  --bg: var(--color-primary-800);
-  --surface: var(--color-primary-800);
-  --surface-2: var(--color-primary-600);
-  --line: var(--color-primary-700);
+  /* semantic color mappings (dark theme, light-blue accent) */
+  --bg: var(--color-primary-975);
+  --surface: var(--color-primary-950);
+  --surface-2: var(--color-primary-900);
+  --line: var(--color-primary-900);
   --ink: var(--color-primary-50);
-  --ink-dim: var(--color-primary-200);
+  --ink-dim: oklch(72% 0.015 235);
 
-  --purple: var(--color-secondary-300);
-  --purple-soft: var(--color-secondary-400);
+  --accent: var(--color-primary-500);
+  --accent-soft: var(--color-primary-400);
 
   --good: #22c55e;
   --bad: #ef4444;
 
   /* map tile states — single source of truth, read by game.js via getComputedStyle */
-  --tile-base: oklch(
-    13.2% 0.038 309
-  ); /* ~20% brighter than --bg so areas stand out */
-  --tile-base-line: var(--color-primary-400);
-  --tile-hover: oklch(22% 0.05 309); /* clearly brighter than base on hover */
+  --tile-base: oklch(22% 0.030 235); /* dark blue, brighter than --bg so areas stand out */
+  --tile-base-line: var(--color-primary-700);
+  --tile-hover: oklch(30% 0.050 233); /* clearly brighter than base on hover */
   --tile-correct: #16a34a;
   --tile-correct-line: var(--good);
   --tile-wrong: #b91c1c;
   --tile-wrong-line: var(--bad);
-  --tile-reveal: var(--color-secondary-500);
-  --tile-reveal-line: var(--color-secondary-400);
-  --tile-ask: var(
-    --color-secondary-300
-  ); /* highlights the mystery area in choice mode */
-  --tile-ask-line: var(--color-secondary-200);
+  --tile-reveal: var(--color-primary-600);
+  --tile-reveal-line: var(--color-primary-400);
+  --tile-ask: var(--color-primary-500); /* highlights the mystery area in choice mode */
+  --tile-ask-line: var(--color-primary-300);
 
   --font-12: 12px;
   --font-14: 14px;
@@ -174,7 +166,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--purple-soft);
+  color: var(--accent-soft);
   flex-shrink: 0;
 }
 .prompt-name {
@@ -334,8 +326,8 @@ body {
   color: var(--ink-dim);
 }
 .l-toggle.active {
-  color: var(--purple);
-  border-color: var(--purple);
+  color: var(--accent);
+  border-color: var(--accent);
 }
 
 /* ---------- toast ---------- */
@@ -389,22 +381,25 @@ body {
   padding: 20px;
   padding-top: calc(20px + var(--safe-t));
   padding-bottom: calc(20px + var(--safe-b));
-  background: radial-gradient(
-    120% 100% at 50% 0%,
-    var(--color-primary-800) 0%,
-    var(--bg) 70%
-  );
+  background: var(--bg);
 }
 .card {
   width: 100%;
   max-width: 420px;
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: transparent;
+  border: none;
   border-radius: 10px;
   padding: 24px 20px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
 }
 
+.stars {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+  color: var(--star);
+  font-size: 22px;
+  line-height: 1;
+}
 .title {
   margin: 0 0 6px;
   font-size: 40px;
@@ -415,7 +410,7 @@ body {
   font-size: 26px;
 }
 .title .accent {
-  color: var(--purple);
+  color: var(--accent);
 }
 .subtitle {
   margin: 0 0 22px;
@@ -465,9 +460,9 @@ body {
   cursor: pointer;
 }
 .seg.active {
-  color: var(--ink);
-  background: var(--surface-2);
-  border-color: var(--purple);
+  color: white;
+  background: var(--accent);
+  border-color: var(--accent);
 }
 
 .primary-btn {
@@ -477,14 +472,14 @@ body {
   font-size: var(--font-16);
   font-weight: 700;
   color: white;
-  background: var(--color-secondary-500);
+  background: var(--accent);
   border: none;
   border-radius: 8px;
   padding: 15px;
   cursor: pointer;
 }
 .primary-btn:active {
-  background: var(--color-secondary-600);
+  background: var(--color-primary-600);
 }
 
 .footnote {
@@ -514,7 +509,7 @@ body {
 .result-num {
   font-size: 26px;
   font-weight: 700;
-  color: var(--purple);
+  color: var(--accent);
   font-family: "DM Mono", monospace;
 }
 .result-cap {
