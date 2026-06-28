@@ -4,19 +4,19 @@
 
 :root {
   /* Chicago flag palette — light blue drives all UI; red is reserved for the stars. */
-  --color-primary-25:  oklch(98.0% 0.005 228.8);
-  --color-primary-50:  oklch(97.4% 0.011 226.0);
-  --color-primary-75:  oklch(96.8% 0.018 229.0);
+  --color-primary-25: oklch(98% 0.005 228.8);
+  --color-primary-50: oklch(97.4% 0.011 226);
+  --color-primary-75: oklch(96.8% 0.018 229);
   --color-primary-100: oklch(95.9% 0.024 230.4);
   --color-primary-200: oklch(93.6% 0.044 222.1);
-  --color-primary-300: oklch(89.9% 0.070 221.5);
+  --color-primary-300: oklch(89.9% 0.07 221.5);
   --color-primary-400: oklch(83.6% 0.105 227.9);
   --color-primary-500: oklch(73.1% 0.123 229.5);
   --color-primary-600: oklch(64.8% 0.128 229.6);
   --color-primary-700: oklch(53.1% 0.108 231.5);
   --color-primary-800: oklch(39.3% 0.082 234.3);
   --color-primary-900: oklch(24.7% 0.055 238.3);
-  --color-primary-950: oklch(17.4% 0.040 240.6);
+  --color-primary-950: oklch(17.4% 0.04 240.6);
   --color-primary-975: oklch(13.8% 0.031 239.3);
 
   /* Chicago flag red — only the four stars use this */
@@ -44,16 +44,20 @@
   --bad: #ef4444;
 
   /* map tile states — single source of truth, read by game.js via getComputedStyle */
-  --tile-base: oklch(22% 0.030 235); /* dark blue, brighter than --bg so areas stand out */
+  --tile-base: oklch(
+    22% 0.03 235
+  ); /* dark blue, brighter than --bg so areas stand out */
   --tile-base-line: var(--color-primary-700);
-  --tile-hover: oklch(30% 0.050 233); /* clearly brighter than base on hover */
+  --tile-hover: oklch(30% 0.05 233); /* clearly brighter than base on hover */
   --tile-correct: #16a34a;
   --tile-correct-line: var(--good);
   --tile-wrong: #b91c1c;
   --tile-wrong-line: var(--bad);
   --tile-reveal: var(--color-primary-600);
   --tile-reveal-line: var(--color-primary-400);
-  --tile-ask: var(--color-primary-500); /* highlights the mystery area in choice mode */
+  --tile-ask: var(
+    --color-primary-500
+  ); /* highlights the mystery area in choice mode */
   --tile-ask-line: var(--color-primary-300);
 
   --font-12: 12px;
@@ -94,7 +98,12 @@ textarea {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-family:
+    system-ui,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
   font-size: 14px;
   font-weight: 500;
   padding: 6px 30px;
@@ -216,7 +225,7 @@ body {
   gap: 8px;
   flex: 1;
 }
-.hud-meta .l-toggle {
+.hud-meta .icon-btn {
   margin-left: auto;
 }
 
@@ -361,8 +370,8 @@ body {
   justify-content: flex-start;
 }
 
-/* 'L' overlay toggle — compact square icon button (sits on .btn-secondary) */
-.l-toggle {
+/* HUD gear — compact square icon button (sits on .btn-secondary) */
+.icon-btn {
   flex: 0 0 auto;
   width: 38px;
   height: 38px;
@@ -372,9 +381,35 @@ body {
   border-radius: 6px;
   color: var(--ink-dim);
 }
-.l-toggle.active {
-  color: var(--accent);
-  border-color: var(--accent);
+
+/* On/off toggle (e.g. settings) — secondary when off, primary when on */
+.toggle {
+  background: var(--btn-secondary);
+  color: var(--btn-secondary-ink);
+  border-color: var(--btn-secondary-line);
+}
+.toggle.active {
+  background: var(--btn-primary);
+  color: #ffffff;
+  border-color: var(--btn-primary);
+}
+
+/* ---------- settings menu ---------- */
+.setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+.setting-label {
+  font-size: var(--font-16);
+  color: var(--ink);
+}
+.settings-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 /* ---------- toast ---------- */

@@ -67,7 +67,10 @@
     tapControls: $("tap-controls"), choiceControls: $("choice-controls"), choices: $("choices"),
     target: $("target"), targetSub: $("target-sub"), progress: $("progress"), score: $("score"), streak: $("streak"),
     toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"), choiceSkipBtn: $("choice-skip-btn"),
-    startScreen: $("start-screen"), endScreen: $("end-screen"), lToggle: $("l-toggle"),
+    startScreen: $("start-screen"), endScreen: $("end-screen"),
+    settingsScreen: $("settings-screen"), settingsBtn: $("settings-btn"),
+    lLinesToggle: $("l-lines-toggle"), resumeBtn: $("resume-btn"),
+    restartBtn: $("restart-btn"), quitBtn: $("quit-btn"),
     regionSelect: $("region-select"), lengthSeg: $("length-seg"), modeSeg: $("mode-seg"),
     startBtn: $("start-btn"), againBtn: $("again-btn"), bestLine: $("best-line"),
     rScore: $("r-score"), rAcc: $("r-acc"), rStreak: $("r-streak"),
@@ -117,9 +120,11 @@
     if (!lLayer) return;
     lVisible = !lVisible;
     if (lVisible) lLayer.addTo(map); else map.removeLayer(lLayer);
-    el.lToggle.classList.toggle("active", lVisible);
-    el.lToggle.setAttribute("aria-pressed", lVisible ? "true" : "false");
+    el.lLinesToggle.classList.toggle("active", lVisible);
+    el.lLinesToggle.setAttribute("aria-pressed", lVisible ? "true" : "false");
+    el.lLinesToggle.textContent = lVisible ? "On" : "Off";
   }
+  if (!lLayer) el.lLinesToggle.disabled = true; // no CTA data → nothing to toggle
 
   map.fitBounds(geoLayer.getBounds(), { padding: [16, 16] });
   var HOME = map.getBounds();
@@ -448,6 +453,25 @@
     el.endScreen.classList.remove("hidden");
   }
 
+  // ----- settings / pause menu -----
+  function openSettings() { el.settingsScreen.classList.remove("hidden"); }
+  function closeSettings() { el.settingsScreen.classList.add("hidden"); }
+
+  function restartGame() {
+    closeSettings();
+    startGame(); // re-shuffles and starts round 1 with the same options
+  }
+
+  function quitToMenu() {
+    closeSettings();
+    state.playing = false;
+    el.hud.classList.add("hidden");
+    el.controls.classList.add("hidden");
+    el.endScreen.classList.add("hidden");
+    showBest();
+    el.startScreen.classList.remove("hidden");
+  }
+
   // ----- wiring -----
   el.startBtn.addEventListener("click", startGame);
   el.againBtn.addEventListener("click", function () {
@@ -458,7 +482,15 @@
   el.skipBtn.addEventListener("click", skip);
   el.choiceSkipBtn.addEventListener("click", skip);
   el.hintBtn.addEventListener("click", hint);
-  el.lToggle.addEventListener("click", toggleL);
+  el.settingsBtn.addEventListener("click", openSettings);
+  el.lLinesToggle.addEventListener("click", toggleL);
+  el.resumeBtn.addEventListener("click", closeSettings);
+  el.restartBtn.addEventListener("click", restartGame);
+  el.quitBtn.addEventListener("click", quitToMenu);
+  // tap the backdrop (outside the card) to dismiss settings
+  el.settingsScreen.addEventListener("click", function (e) {
+    if (e.target === el.settingsScreen) closeSettings();
+  });
   document.getElementById("export-btn").addEventListener("click", exportScores);
 
   // single-select segmented controls (Length, Mode)
