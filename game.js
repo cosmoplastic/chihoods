@@ -8,20 +8,44 @@
   var DATA = window.CHICAGO_COMMUNITY_AREAS;
   if (!DATA) { alert("Neighborhood data failed to load."); return; }
 
-  // Common-name aliases, keyed by community-area number. Many official areas are
-  // better known by a neighborhood inside them; we quiz on the familiar name and
-  // show the official area as a subtitle. Edit freely — purely presentational.
-  var ALIASES = {
-    6:  "Boystown",         // Lake View
-    24: "Wicker Park",      // West Town
-    28: "West Loop",        // Near West Side
-    30: "Little Village",   // South Lawndale
-    31: "Pilsen",           // Lower West Side
-    33: "South Loop",       // Near South Side
-    34: "Chinatown",        // Armour Square
-    61: "Back of the Yards" // New City
+  // Well-known micro-neighborhoods within each official community area, keyed by
+  // area number. We quiz on the official name (what the game teaches) and surface
+  // these familiar names as an always-visible hint. Only areas with genuinely
+  // recognizable nicknames need an entry. Edit freely — purely presentational.
+  var NEIGHBORHOODS = {
+    2:  ["West Rogers Park"],
+    3:  ["Buena Park", "Sheridan Park"],
+    4:  ["Ravenswood"],
+    5:  ["Roscoe Village", "St. Ben's"],
+    6:  ["Wrigleyville", "Boystown (Northalsted)"],
+    7:  ["Old Town Triangle", "Sheffield", "DePaul"],
+    8:  ["Gold Coast", "River North", "Streeterville", "Old Town"],
+    14: ["Mayfair", "Ravenswood Manor"],
+    15: ["Six Corners"],
+    16: ["Old Irving Park"],
+    22: ["Palmer Square"],
+    24: ["Wicker Park", "Bucktown", "Ukrainian Village", "East Village"],
+    28: ["West Loop", "Fulton Market", "Greektown", "Little Italy"],
+    30: ["Little Village (La Villita)"],
+    31: ["Pilsen", "Heart of Chicago"],
+    32: ["The Loop", "Printer's Row"],
+    33: ["South Loop", "Printers Row", "Motor Row"],
+    34: ["Chinatown", "Wentworth Gardens"],
+    35: ["Bronzeville (north)", "Prairie Shores"],
+    38: ["Bronzeville"],
+    60: ["Bridgeport"],
+    61: ["Back of the Yards", "Canaryville"],
+    66: ["Marquette Park"],
+    73: ["Brainerd"],
+    77: ["Andersonville", "Edgewater Glen"]
   };
-  function displayName(p) { return (p && (ALIASES[p.num] || p.name)) || "?"; }
+  function displayName(p) { return (p && p.name) || "?"; }
+  function hintFor(p) { return (p && NEIGHBORHOODS[p.num]) || null; }
+  function hintText(p, max) {
+    var list = hintFor(p);
+    if (!list) return "";
+    return list.slice(0, max).join(" · ");
+  }
 
   // ----- polygon styling (colors sourced from CSS so they live in one place) -----
   var rootStyle = getComputedStyle(document.documentElement);
@@ -254,7 +278,8 @@
   // ----- tap mode: name shown, tap the map -----
   function setupTapRound() {
     el.target.textContent = displayName(state.current);
-    el.targetSub.textContent = ALIASES[state.current.num] ? state.current.name : "";
+    var hint = hintText(state.current, 4);
+    el.targetSub.textContent = hint ? "incl. " + hint : "";
   }
 
   function onGuess(num) {
@@ -266,10 +291,7 @@
     if (num === target.num) {
       layersByNum[num].setStyle(STYLE.correct);
       scoreCorrect();
-      var goodSub = ALIASES[target.num]
-        ? displayName(target) + " · " + target.name
-        : target.name + " · " + target.side + " Side";
-      toast("Correct!", goodSub, "good");
+      toast("Correct!", target.name + " · " + target.side + " Side", "good");
       setTimeout(nextRound, 900);
     } else {
       layersByNum[num].setStyle(STYLE.wrong);
@@ -307,8 +329,21 @@
       var btn = document.createElement("button");
       btn.type = "button";
       btn.className = "choice-btn";
-      btn.textContent = displayName(opt);
       btn.dataset.num = opt.num;
+
+      var name = document.createElement("span");
+      name.className = "choice-name";
+      name.textContent = displayName(opt);
+      btn.appendChild(name);
+
+      var hint = hintText(opt, 2);
+      if (hint) {
+        var sub = document.createElement("span");
+        sub.className = "choice-hint";
+        sub.textContent = hint;
+        btn.appendChild(sub);
+      }
+
       btn.addEventListener("click", function () { onChoice(opt.num); });
       el.choices.appendChild(btn);
     });
