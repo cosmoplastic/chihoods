@@ -65,7 +65,7 @@
   var el = {
     hud: $("hud"), controls: $("controls"),
     tapControls: $("tap-controls"), choiceControls: $("choice-controls"), choices: $("choices"),
-    target: $("target"), targetSub: $("target-sub"), progress: $("progress"), score: $("score"), streak: $("streak"),
+    target: $("target"), targetSub: $("target-sub"), progress: $("progress"), progressFill: $("progress-fill"), score: $("score"), streak: $("streak"),
     toast: $("toast"), hintBtn: $("hint-btn"), skipBtn: $("skip-btn"), choiceSkipBtn: $("choice-skip-btn"),
     startScreen: $("start-screen"), endScreen: $("end-screen"),
     settingsScreen: $("settings-screen"), settingsBtn: $("settings-btn"),
@@ -158,6 +158,13 @@
   function selectedMode() {
     var btn = el.modeSeg.querySelector(".seg.active");
     return btn ? btn.dataset.mode : "tap";
+  }
+  // fit padding that keeps the framed area clear of the floating HUD and bottom sheet
+  function framePadding(pad, opts) {
+    opts = opts || {};
+    opts.paddingTopLeft = [pad, el.hud.offsetHeight + pad];
+    opts.paddingBottomRight = [pad, el.controls.offsetHeight + pad];
+    return opts;
   }
   function resetStyles() {
     for (var n in layersByNum) layersByNum[n].setStyle(STYLE.base);
@@ -260,12 +267,13 @@
     el.hud.classList.remove("hidden");
     el.controls.classList.remove("hidden");
     // tap mode views the whole city; choice mode zooms to each target in setup
-    if (!choice) map.flyToBounds(HOME, { padding: [16, 16], duration: 0.5 });
+    if (!choice) map.flyToBounds(HOME, framePadding(16, { duration: 0.5 }));
     nextRound();
   }
 
   function updateChips() {
     el.progress.textContent = (state.answered + 1) + " / " + state.total;
+    el.progressFill.style.width = (state.total ? (state.answered / state.total) * 100 : 0) + "%";
     el.score.textContent = state.correct + " correct";
     el.streak.textContent = "🔥 " + state.streak;
   }
@@ -313,18 +321,6 @@
   function setupChoiceRound() {
     var target = state.current;
     layersByNum[target.num].setStyle(STYLE.ask);
-    // ease toward the highlighted area, but keep plenty of city context so you can
-    // tell where it sits (lakeshore, neighbors). Small areas hit the maxZoom cap;
-    // at a fixed zoom a wide desktop viewport shows more geography (area looks tiny)
-    // than a phone, so the cap is responsive: looser on mobile, tighter on desktop.
-    var vw = window.innerWidth || document.documentElement.clientWidth || 1024;
-    var maxZoom = vw >= 720 ? 12.5 : 11;
-    // fitBounds (not flyToBounds): the fly trajectory math throws "Invalid LatLng
-    // (NaN, NaN)" for some center/zoom combos; fitBounds animates without it.
-    map.fitBounds(layersByNum[target.num].getBounds(), {
-      padding: [60, 60], maxZoom: maxZoom, animate: true, duration: 0.6
-    });
-
     // correct answer + up to three distractors from the same pool
     var others = shuffle(state.pool.filter(function (p) { return p.num !== target.num; })).slice(0, 3);
     var options = shuffle([target].concat(others));
@@ -352,6 +348,18 @@
       btn.addEventListener("click", function () { onChoice(opt.num); });
       el.choices.appendChild(btn);
     });
+
+    // ease toward the highlighted area, but keep plenty of city context so you can
+    // tell where it sits (lakeshore, neighbors). Small areas hit the maxZoom cap;
+    // at a fixed zoom a wide desktop viewport shows more geography (area looks tiny)
+    // than a phone, so the cap is responsive: looser on mobile, tighter on desktop.
+    var vw = window.innerWidth || document.documentElement.clientWidth || 1024;
+    var maxZoom = vw >= 720 ? 12.5 : 11;
+    // fitBounds (not flyToBounds): the fly trajectory math throws "Invalid LatLng
+    // (NaN, NaN)" for some center/zoom combos; fitBounds animates without it.
+    map.fitBounds(layersByNum[target.num].getBounds(), framePadding(60, {
+      maxZoom: maxZoom, animate: true, duration: 0.6
+    }));
   }
 
   function onChoice(num) {

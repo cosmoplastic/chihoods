@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<!--  chicago-neighborhoods v1.1 -->
-<!-- v1.1: optional CTA 'L' rail-line overlay (toggle in HUD).
+<!--  chicago-neighborhoods v1.6 -->
+<!-- v1.6: modern makeover (glass panels over the map, HUD progress bar, switch toggle).
+     v1.1: optional CTA 'L' rail-line overlay (toggle in HUD).
      v1.0: tap-the-map quiz of Chicago's 77 official community areas. Self-contained,
      offline-capable (Leaflet vendored locally, no map tiles). Mobile-first. -->
 <html lang="en">
@@ -8,14 +9,14 @@
     <meta charset="utf-8" />
     <meta name="viewport"
       content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a141c" />
+    <meta name="theme-color" content="#050d14" />
     <title>Chicago Neighborhoods — Learn the Map</title>
 
     <!-- Favicon + iOS "Add to Home Screen" icon. iOS uses apple-touch-icon (not the
        favicon or any manifest) for the home-screen tile, and flattens transparency
        onto a background, so apple-touch-icon.png is a pre-flattened opaque 180×180. -->
-    <link rel="icon" type="image/png" href="assets/icon.png?v=1.5" />
-    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=1.5" />
+    <link rel="icon" type="image/png" href="assets/icon.png?v=1.6" />
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png?v=1.6" />
     <meta name="apple-mobile-web-app-title" content="ChicagoHoods" />
 
     <!-- Launch fullscreen (no Safari chrome) when opened from the home screen.
@@ -29,23 +30,37 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap"
       rel="stylesheet" />
     <link rel="stylesheet" href="vendor/leaflet.css" />
-    <link rel="stylesheet" href="style.css?v=1.5" />
+    <link rel="stylesheet" href="style.css?v=1.6" />
   </head>
   <body>
     <div id="map" aria-label="Map of Chicago community areas"></div>
 
     <!-- Top HUD: progress & controls -->
     <header id="hud" class="hidden">
-      <div class="hud-row hud-meta">
-        <span id="progress" class="meta-chip">0 / 0</span>
-        <span id="score" class="meta-chip">0 correct</span>
-        <span id="streak" class="meta-chip">🔥 0</span>
-        <button id="settings-btn" class="btn btn-secondary icon-btn"
-          type="button" aria-label="Settings" title="Settings">⚙</button>
+      <div class="hud-bar">
+        <div class="hud-row hud-meta">
+          <span id="progress" class="meta-chip meta-progress">0 / 0</span>
+          <span id="score" class="meta-chip">0 correct</span>
+          <span id="streak" class="meta-chip">🔥 0</span>
+        </div>
+        <div class="progress-track" aria-hidden="true">
+          <span id="progress-fill" class="progress-fill"></span>
+        </div>
       </div>
+      <button id="settings-btn" class="btn icon-btn" type="button"
+        aria-label="Settings" title="Settings">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round" aria-hidden="true">
+          <line x1="4" y1="7" x2="20" y2="7" />
+          <line x1="4" y1="17" x2="20" y2="17" />
+          <circle cx="9" cy="7" r="2.2" fill="currentColor" />
+          <circle cx="15" cy="17" r="2.2" fill="currentColor" />
+        </svg>
+      </button>
     </header>
 
     <!-- Bottom controls during play -->
@@ -62,9 +77,8 @@
         <div class="button-row">
           <button id="hint-btn" class="btn btn-secondary" type="button"
             aria-label="Hint">Hint</button>
-          <button id="skip-btn" class="btn btn-tertiary" type="button">Skip —
-            show
-            me</button>
+          <button id="skip-btn" class="btn btn-tertiary" type="button">Skip,
+            show me</button>
         </div>
       </div>
 
@@ -78,8 +92,7 @@
         <div id="choices" class="choices-grid"></div>
         <div class="button-row">
           <button id="choice-skip-btn" class="btn btn-tertiary"
-            type="button">Skip —
-            show me</button>
+            type="button">Skip, show me</button>
         </div>
       </div>
     </footer>
@@ -88,7 +101,7 @@
 
     <!-- Start screen -->
     <div id="start-screen" class="overlay">
-      <div class="card">
+      <div class="card card-hero">
         <div class="stars" aria-hidden="true">
           <img src="assets/flag-stars.svg" alt />
         </div>
@@ -124,8 +137,8 @@
         <button id="start-btn" class="btn btn-primary btn-lg btn-block"
           type="button">Start</button>
         <p class="footnote" id="best-line"></p>
-        <button id="export-btn" class="btn btn-tertiary" type="button"
-          style="margin-top: 1rem;">Export scores (JSON)</button>
+        <button id="export-btn" class="btn btn-tertiary btn-sm export-btn"
+          type="button">Export scores (JSON)</button>
       </div>
     </div>
 
@@ -136,8 +149,9 @@
 
         <div class="setting-row">
           <span class="setting-label">Show ‘L’ train lines</span>
-          <button id="l-lines-toggle" class="btn toggle active" type="button"
-            aria-pressed="true">On</button>
+          <button id="l-lines-toggle" class="toggle active" type="button"
+            aria-pressed="true"
+            aria-label="Show L train lines">On</button>
         </div>
 
         <div class="settings-actions">
@@ -176,9 +190,9 @@
       </div>
     </div>
 
-    <script src="vendor/leaflet.js?v=1.5"></script>
-    <script src="data/community-areas.js?v=1.5"></script>
-    <script src="data/cta-l-lines.js?v=1.5"></script>
-    <script src="game.js?v=1.5"></script>
+    <script src="vendor/leaflet.js?v=1.6"></script>
+    <script src="data/community-areas.js?v=1.6"></script>
+    <script src="data/cta-l-lines.js?v=1.6"></script>
+    <script src="game.js?v=1.6"></script>
   </body>
 </html>
