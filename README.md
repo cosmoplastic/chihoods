@@ -35,7 +35,7 @@ It's a plain static page — no build step, no backend, works offline.
 - **Game:** `game.js` — a small state machine (start → rounds → summary). Tracks score,
   current streak, best streak (saved to `localStorage`), and the neighborhoods you
   missed. Pick a region (whole city or one side) and a length (Quick 10 / Full 77).
-- **Look:** `style.css` — orange-on-warm-dark, echoing the design DNA.
+- **Look:** `style.css`, Chicago flag blue on a deep navy map. Glass panels float over the map (HUD with progress bar, bottom sheet for the prompt), with Bricolage Grotesque for display type.
 
 ## Data provenance / regenerating
 
